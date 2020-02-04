@@ -92,7 +92,7 @@ def bootstrap(fips_dir):
 def install(fips_dir):
     log.colored(log.YELLOW, "=== installing Dawn SDK".format(get_sdk_dir(fips_dir)))
     if not ninja.check_exists(fips_dir):
-        log.error('ninja build tool is need to build Dawn')
+        log.error('ninja build tool is needed to build Dawn')
     fetch_dawn(fips_dir)
     fetch_depot_tools(fips_dir)
     bootstrap(fips_dir)
