@@ -124,4 +124,4 @@ def help():
         'fips dawn install\n' +
         'fips dawn uninstall\n' +
         log.DEF +
-        '    setup and build Google Dawn SDK')
+        '    install and manage Google Dawn SDK')

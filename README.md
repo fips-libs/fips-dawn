@@ -2,11 +2,8 @@
 
 [WIP] don't use this yet
 
-This makes a "Google Dawn SDK" available to fips projects under ```fips-sdks/dawn```,
-similar to the Emscripten SDK or Android SDK.
-
-The SDK will be exposed to fips projects as a "webgpu/webgpu.h" header,
-and a static link library to link against.
+This makes a locally compiled [Google Dawn SDK](https://dawn.googlesource.com/dawn)
+available to fips projects as a header ```dawn/webgpu.h``` and static libraries.
 
 ## How to use:
 
@@ -21,8 +18,34 @@ imports:
 
 2. Fetch dependencies: ```./fips fetch```
 
-3. Check if the new fips verb ```dawn``` is recognized: ```./fips help dawn```
+3. Check if the new fips verb ```dawn``` is recognized: ```./fips help dawn```,
+    you should see:
 
-4. Install and bootstrap the Dawn SDK: ```./fips dawn install```
+    ```sh
+    fips dawn install
+    fips dawn uninstall
+        install and manage Google Dawn SDK 
+    ```
 
-5. FIXME:
+4. Install and build the Dawn SDK: ```./fips dawn install```, this will 
+    take a little while.
+
+5. Use the Dawn SDK headers and libraries in your project:
+
+    In C or C++ code:
+    ```c
+    #include "dawn/webgpu.h
+    ```
+
+    As lib dependency in CMakeLists.txt files:
+
+    ```cmake
+        fips_libs(libdawn_native)
+    ```
+
+    A Debug or Release build of the libraries will be automatically selected
+    depending on the cmake build mode.
+
+
+
+
