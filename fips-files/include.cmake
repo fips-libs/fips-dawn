@@ -1,14 +1,14 @@
-# FIXME: more platforms
+get_filename_component(DAWN_SDK_DIR ${FIPS_ROOT_DIR}/../fips-sdks/dawn/dawn ABSOLUTE)
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-    get_filename_component(DAWN_BUILD_DIR ${FIPS_ROOT_DIR}/../fips-sdks/dawn/dawn/out/Debug ABSOLUTE)
+    set(DAWN_BUILD_DIR ${DAWN_SDK_DIR}/out/Debug)
 else()
-    get_filename_component(DAWN_BUILD_DIR ${FIPS_ROOT_DIR}/../fips-sdks/dawn/dawn/out/Release ABSOLUTE)
+    set(DAWN_BUILD_DIR ${DAWN_SDK_DIR}/out/Release)
 endif()
+message("DAWN_SDK_DIR: ${DAWN_SDK_DIR}")
 message("DAWN_BUILD_DIR: ${DAWN_BUILD_DIR}")
 
-# include Dawn header as "dawn/webgpu.h"
-include_directories(${DAWN_BUILD_DIR}/gen/src/include)
-# FIXME: .a vs .lib
+include_directories(${DAWN_SDK_DIR}/src/include ${DAWN_BUILD_DIR}/gen/src/include)
 link_directories(${DAWN_BUILD_DIR}/obj)
+link_directories(${DAWN_BUILD_DIR}/obj/src/dawn)
 
 
