@@ -69,6 +69,13 @@ def gn(fips_dir, args):
     cmd.extend(args)
     subprocess.call(cmd, cwd = get_dawn_dir(fips_dir))
 
+# overwrite the args.gn file in the output directory
+def write_build_args(fips_dir, cfg, args):
+    args_path = get_out_dir(fips_dir) + '/' + cfg + '/args.gn'
+    with open(args_path, 'w') as f:
+        for arg in args:
+            f.write(arg + '\n')
+
 # bootstrap the build
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
@@ -79,9 +86,11 @@ def bootstrap(fips_dir):
         shutil.copy(gclient_src, gclient_dst)
     gclient(fips_dir, ['sync'])
     log.info('>> generating release build files')
-    gn(fips_dir, ['gen', 'out/Release', '--args is_debug=false dawn_complete_static_libs=true'])
+    gn(fips_dir, ['gen', 'out/Release'])
+    write_build_args(fips_dir, 'Release', ['is_debug=true', 'dawn_complete_static_libs=true'])
     log.info('>> generating debug build files')
-    gn(fips_dir, ['gen', 'out/Debug', '--args is_debug=true dawn_complete_static_libs=true'])
+    gn(fips_dir, ['gen', 'out/Debug'])
+    write_build_args(fips_dir, 'Debug', ['is_debug=false', 'dawn_complete_static_libs=true'])
     out_dir = get_out_dir(fips_dir)
     log.info('>> building debug version...')
     ninja.run_build(fips_dir, None, out_dir + '/Debug', 6)
@@ -118,6 +127,8 @@ def run(fips_dir, proj_dir, args):
             install(fips_dir)
         elif cmd == 'uninstall':
             uninstall(fips_dir)
+        else:
+            log.error("unknown subcmd '{}', valid subcmds are 'install' and 'uninstall'".format(cmd))
 
 def help():
     log.info(log.YELLOW +
