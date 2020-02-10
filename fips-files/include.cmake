@@ -7,7 +7,7 @@ endif()
 message("DAWN_SDK_DIR: ${DAWN_SDK_DIR}")
 message("DAWN_BUILD_DIR: ${DAWN_BUILD_DIR}")
 
-include_directories(${DAWN_SDK_DIR}/src/include ${DAWN_BUILD_DIR}/gen/src/include)
+include_directories(${DAWN_BUILD_DIR}/gen/src/include ${DAWN_SDK_DIR}/src/include ${DAWN_SDK_DIR}/src)
 link_directories(${DAWN_BUILD_DIR}/obj)
 link_directories(${DAWN_BUILD_DIR}/obj/src/dawn)
 
