@@ -96,6 +96,13 @@ def bootstrap(fips_dir):
     ninja.run_build(fips_dir, None, out_dir + '/Debug', 6)
     log.info('>> building release version...')
     ninja.run_build(fips_dir, None, out_dir + '/Release', 6) 
+    # create dummy link directories so that Xcode doesn't complain
+    make_dirs(out_dir + '/Debug/obj/Debug')
+    make_dirs(out_dir + '/Debug/obj/src/dawn/Debug')
+    make_dirs(out_dir + '/Debug/obj/third_party/Debug')
+    make_dirs(out_dir + '/Release/obj/Release')
+    make_dirs(out_dir + '/Release/obj/src/dawn/Release')
+    make_dirs(out_dir + '/Release/obj/third_party/Release')
 
 # install and build the "Dawn SDK" into fips-sdks/dawn
 def install(fips_dir):
