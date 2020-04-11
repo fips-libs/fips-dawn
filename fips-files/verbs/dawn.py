@@ -35,6 +35,10 @@ def get_out_dir(fips_dir):
 def get_depot_tools_dir(fips_dir):
     return get_out_dir(fips_dir) + '/depot_tools'
 
+# get the build directory for a specific mode (Debug or Release)
+def get_build_dir(fips_dir, mode):
+    return get_out_dir(fips_dir) + '/' + mode
+
 # fetch Dawn source repository to fips-sdks/dawn/dawn
 def fetch_dawn(fips_dir):
     sdk_dir = get_sdk_dir(fips_dir)
@@ -63,18 +67,13 @@ def gclient(fips_dir, args):
     cmd.extend(args)
     subprocess.call(cmd, cwd = get_dawn_dir(fips_dir))
 
-# run the gn tool
-def gn(fips_dir, args):
-    cmd = [ get_depot_tools_dir(fips_dir) + '/gn' ]
+# run cmake
+def cmake(fips_dir, mode, args):
+    cmd = [ 'cmake' ]
     cmd.extend(args)
-    subprocess.call(cmd, cwd = get_dawn_dir(fips_dir))
-
-# overwrite the args.gn file in the output directory
-def write_build_args(fips_dir, cfg, args):
-    args_path = get_out_dir(fips_dir) + '/' + cfg + '/args.gn'
-    with open(args_path, 'w') as f:
-        for arg in args:
-            f.write(arg + '\n')
+    build_dir = get_build_dir(fips_dir, mode)
+    make_dirs(build_dir)
+    subprocess.call(cmd, cwd = build_dir)
 
 # bootstrap the build
 def bootstrap(fips_dir):
@@ -84,25 +83,29 @@ def bootstrap(fips_dir):
     gclient_dst = dawn_dir + '/.gclient'
     if not os.path.isfile(gclient_dst):
         shutil.copy(gclient_src, gclient_dst)
-    gclient(fips_dir, ['sync'])
-    log.info('>> generating release build files')
-    gn(fips_dir, ['gen', 'out/Release'])
-    write_build_args(fips_dir, 'Release', ['is_debug=false', 'dawn_complete_static_libs=true', 'use_custom_libcxx=false'])
+    gclient(fips_dir, ['sync'])    
     log.info('>> generating debug build files')
-    gn(fips_dir, ['gen', 'out/Debug'])
-    write_build_args(fips_dir, 'Debug', ['is_debug=true', 'dawn_complete_static_libs=true', 'use_custom_libcxx=false'])
-    out_dir = get_out_dir(fips_dir)
+    cmake(fips_dir, 'Debug', ['-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Debug', '../..'])
+    log.info('>> generating release build files')
+    cmake(fips_dir, 'Release', ['-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '../..'])
     log.info('>> building debug version...')
-    ninja.run_build(fips_dir, None, out_dir + '/Debug', 6)
+    cmake(fips_dir, 'Debug', ['--build', '.'])
     log.info('>> building release version...')
-    ninja.run_build(fips_dir, None, out_dir + '/Release', 6) 
+    cmake(fips_dir, 'Release', ['--build', '.'])
     # create dummy link directories so that Xcode doesn't complain
-    make_dirs(out_dir + '/Debug/obj/Debug')
-    make_dirs(out_dir + '/Debug/obj/src/dawn/Debug')
-    make_dirs(out_dir + '/Debug/obj/third_party/Debug')
-    make_dirs(out_dir + '/Release/obj/Release')
-    make_dirs(out_dir + '/Release/obj/src/dawn/Release')
-    make_dirs(out_dir + '/Release/obj/third_party/Release')
+    log.info('>> creating dummy link dirs...')
+    for mode in ['Debug', 'Release']:
+        for dir in ['/src/dawn',
+                    '/src/common',
+                    '/src/dawn_native',
+                    '/src/dawn_platform',
+                    '/src/dawn_wire',
+                    '/src/utils',
+                    '/third_party/shaderc/libshaderc_spvc',
+                    '/third_party/glfw/src']:
+            dummy_dir = get_build_dir(fips_dir, mode) + dir + '/' + mode
+            log.info('    {}'.format(dummy_dir))
+            make_dirs(dummy_dir)
 
 # install and build the "Dawn SDK" into fips-sdks/dawn
 def install(fips_dir):
