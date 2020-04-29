@@ -30,7 +30,16 @@ imports:
 4. Install and build the Dawn SDK: ```./fips dawn install```, this will 
     take a little while.
 
-5. Use the Dawn SDK headers and libraries in your project:
+5. In your toplevel CMakeLists.txt files, before fips_setup(), define the
+   variable USE_DAWN_SDK (if your build targets are not actually using
+   the DAWN SDK it's better to set this to OFF so that no additional
+   library search paths will be added to the project):
+
+   ```cmake
+       set(USE_DAWN_SDK ON)
+   ```
+
+6. Use the Dawn SDK headers and libraries in your project:
 
     In C or C++ code:
     ```c
