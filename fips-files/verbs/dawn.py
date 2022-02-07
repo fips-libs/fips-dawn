@@ -76,6 +76,7 @@ def cmake(fips_dir, mode, args):
     subprocess.call(cmd, cwd = build_dir)
 
 # bootstrap the build
+# FIXME: currently hardwired to the Metal backend
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
     dawn_dir = get_dawn_dir(fips_dir)
@@ -89,6 +90,7 @@ def bootstrap(fips_dir):
         '-G', 'Ninja',
         '-DCMAKE_BUILD_TYPE=Debug',
         '-DCMAKE_OSX_DEPLOYMENT_TARGET="10.13"',
+        '-DDAWN_ENABLE_METAL=ON',
         '../..'
     ]
     cmake(fips_dir, 'Debug', cmake_args)
