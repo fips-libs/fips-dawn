@@ -85,7 +85,13 @@ def bootstrap(fips_dir):
         shutil.copy(gclient_src, gclient_dst)
     gclient(fips_dir, ['sync'])    
     log.info('>> generating debug build files')
-    cmake(fips_dir, 'Debug', ['-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Debug', '../..'])
+    cmake_args = [
+        '-G', 'Ninja',
+        '-DCMAKE_BUILD_TYPE=Debug',
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET="10.13"',
+        '../..'
+    ]
+    cmake(fips_dir, 'Debug', cmake_args)
     log.info('>> generating release build files')
     cmake(fips_dir, 'Release', ['-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '../..'])
     log.info('>> building debug version...')
@@ -96,12 +102,9 @@ def bootstrap(fips_dir):
     log.info('>> creating dummy link dirs...')
     for mode in ['Debug', 'Release']:
         for dir in ['/src/dawn',
-                    '/src/common',
                     '/src/dawn_native',
-                    '/src/dawn_platform',
-                    '/src/dawn_wire',
-                    '/src/utils',
                     '/third_party/shaderc/libshaderc_spvc',
+                    '/third_party/tint/src',
                     '/third_party/glfw/src']:
             dummy_dir = get_build_dir(fips_dir, mode) + dir + '/' + mode
             log.info('    {}'.format(dummy_dir))
