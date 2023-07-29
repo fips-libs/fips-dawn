@@ -13,7 +13,6 @@ from mod import log, util, settings
 from mod.tools import git, ninja
 
 DAWN_URL = 'https://dawn.googlesource.com/dawn'
-DEPOT_TOOLS_URL = 'https://chromium.googlesource.com/chromium/tools/depot_tools.git'
 
 def make_dirs(path):
     if not os.path.isdir(path):
@@ -31,10 +30,6 @@ def get_dawn_dir(fips_dir):
 def get_out_dir(fips_dir):
     return get_dawn_dir(fips_dir) + '/out'
 
-# get the depot tools directory
-def get_depot_tools_dir(fips_dir):
-    return get_out_dir(fips_dir) + '/depot_tools'
-
 # get the build directory for a specific mode (Debug or Release)
 def get_build_dir(fips_dir, mode):
     return get_out_dir(fips_dir) + '/' + mode
@@ -50,27 +45,11 @@ def fetch_dawn(fips_dir):
     else:
         log.info('>> Dawn sources already cloned to {}'.format(dawn_dir))
 
-# fetch Google build tools to fips-sdks/dawn/dawn/out/depot_tools
-def fetch_depot_tools(fips_dir):
-    out_dir = get_out_dir(fips_dir)
-    make_dirs(out_dir)
-    dt_dir = get_depot_tools_dir(fips_dir)
-    if not os.path.isdir(dt_dir):
-        log.info('>> cloning depot_tools to {}'.format(dt_dir))
-        git.clone(DEPOT_TOOLS_URL, None, 1, 'depot_tools', out_dir)
-    else:
-        log.info('>> depot_tools already cloned to {}'.format(dt_dir))
-
-# run the gclient tool
-def gclient(fips_dir, args):
-    cmd = [ get_depot_tools_dir(fips_dir) + '/gclient' ]
-    cmd.extend(args)
-    subprocess.call(cmd, cwd = get_dawn_dir(fips_dir))
-
 # run cmake
 def cmake(fips_dir, mode, args):
     cmd = [ 'cmake' ]
     cmd.extend(args)
+    print(f'{" ".join(cmd)}')
     build_dir = get_build_dir(fips_dir, mode)
     make_dirs(build_dir)
     subprocess.call(cmd, cwd = build_dir)
@@ -80,37 +59,37 @@ def cmake(fips_dir, mode, args):
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
     dawn_dir = get_dawn_dir(fips_dir)
-    gclient_src = dawn_dir + '/scripts/standalone.gclient'
-    gclient_dst = dawn_dir + '/.gclient'
-    if not os.path.isfile(gclient_dst):
-        shutil.copy(gclient_src, gclient_dst)
-    gclient(fips_dir, ['sync'])    
     log.info('>> generating debug build files')
-    cmake_args = [
+    common_args = [
         '-G', 'Ninja',
-        '-DCMAKE_BUILD_TYPE=Debug',
-        '-DCMAKE_OSX_DEPLOYMENT_TARGET="10.13"',
-        '-DDAWN_ENABLE_METAL=ON',
-        '../..'
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13',
+        '-DDAWN_FETCH_DEPENDENCIES=ON',
+        '-DDAWN_ENABLE_NULL=OFF',
+        '-DDAWN_BUILD_SAMPLES=OFF',
+        '-DTINT_BUILD_SAMPLES=OFF',
+        '-DTINT_BUILD_DOCS=OFF',
+        '-DTINT_BUILD_TESTS=OFF',
     ]
-    cmake(fips_dir, 'Debug', cmake_args)
+    debug_args = [ *common_args, '-DCMAKE_BUILD_TYPE=Debug', '../..' ]
+    release_args = [ *common_args, '-DCMAKE_BUILD_TYPE=Release', '../..' ]
+    cmake(fips_dir, 'Debug', debug_args)
     log.info('>> generating release build files')
-    cmake(fips_dir, 'Release', ['-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '../..'])
+    cmake(fips_dir, 'Release', release_args)
     log.info('>> building debug version...')
     cmake(fips_dir, 'Debug', ['--build', '.'])
     log.info('>> building release version...')
     cmake(fips_dir, 'Release', ['--build', '.'])
     # create dummy link directories so that Xcode doesn't complain
-    log.info('>> creating dummy link dirs...')
-    for mode in ['Debug', 'Release']:
-        for dir in ['/src/dawn',
-                    '/src/dawn_native',
-                    '/third_party/shaderc/libshaderc_spvc',
-                    '/third_party/tint/src',
-                    '/third_party/glfw/src']:
-            dummy_dir = get_build_dir(fips_dir, mode) + dir + '/' + mode
-            log.info('    {}'.format(dummy_dir))
-            make_dirs(dummy_dir)
+    #log.info('>> creating dummy link dirs...')
+    #for mode in ['Debug', 'Release']:
+    #    for dir in ['/src/dawn',
+    #                '/src/dawn_native',
+    #                '/third_party/shaderc/libshaderc_spvc',
+    #                '/third_party/tint/src',
+    #                '/third_party/glfw/src']:
+    #        dummy_dir = get_build_dir(fips_dir, mode) + dir + '/' + mode
+    #        log.info('    {}'.format(dummy_dir))
+    #        make_dirs(dummy_dir)
 
 # install and build the "Dawn SDK" into fips-sdks/dawn
 def install(fips_dir):
@@ -118,7 +97,6 @@ def install(fips_dir):
     if not ninja.check_exists(fips_dir):
         log.error('ninja build tool is needed to build Dawn')
     fetch_dawn(fips_dir)
-    fetch_depot_tools(fips_dir)
     bootstrap(fips_dir)
 
 # delete the "Dawn SDK" in fips-sdks/dawn
