@@ -10,9 +10,10 @@
 import os, shutil, subprocess
 
 from mod import log, util, settings
-from mod.tools import git, ninja
+from mod.tools import ninja
 
 DAWN_URL = 'https://dawn.googlesource.com/dawn'
+DAWN_REF = 'db46be1539c3e7784c87ea9c0b4e8568c6b1c179'
 
 def make_dirs(path):
     if not os.path.isdir(path):
@@ -41,7 +42,8 @@ def fetch_dawn(fips_dir):
     dawn_dir = get_dawn_dir(fips_dir)
     if not os.path.isdir(dawn_dir):
         log.info('>> cloning Dawn sources to {}'.format(dawn_dir))
-        git.clone(DAWN_URL, None, 1, 'dawn', sdk_dir)
+        subprocess.call(f'git clone {DAWN_URL}', cwd=sdk_dir, shell=True)
+        subprocess.call(f'git checkout {DAWN_REF}', cwd=dawn_dir, shell=True)
     else:
         log.info('>> Dawn sources already cloned to {}'.format(dawn_dir))
 
