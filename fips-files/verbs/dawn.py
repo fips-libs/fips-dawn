@@ -5,6 +5,10 @@
 #
 #   Bootstrap Google Dawn as SDK for other fips projects (similar
 #   to the emscripten or Android SDKs)
+#
+#   NOTE: there's now also downloadable precompiled packages here
+#   but those only have the webgpu_dawn DLL and headers, not the GLFW
+#   glue code: https://github.com/google/dawn/actions
 #===============================================================================
 
 import os, shutil, subprocess
@@ -43,7 +47,7 @@ def fetch_dawn(fips_dir):
         log.info('>> cloning Dawn sources to {}'.format(dawn_dir))
         subprocess.call(f'git clone --depth=1 {DAWN_URL}', cwd=sdk_dir, shell=True)
         subprocess.call('git submodule init', cwd=dawn_dir, shell=True)
-        subprocess.call('git submodule update', cwd=dawn_dir, shell=True)
+        subprocess.call('git submodule update --depth=1', cwd=dawn_dir, shell=True)
     else:
         log.info('>> Dawn sources already cloned to {}'.format(dawn_dir))
 
@@ -57,7 +61,6 @@ def cmake(fips_dir, mode, args):
     subprocess.call(cmd, cwd = build_dir)
 
 # bootstrap the build
-# FIXME: currently hardwired to the Metal backend
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
     dawn_dir = get_dawn_dir(fips_dir)
