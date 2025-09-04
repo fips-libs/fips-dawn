@@ -66,10 +66,10 @@ def bootstrap(fips_dir):
     dawn_dir = get_dawn_dir(fips_dir)
     common_args = [
         '-G', 'Ninja',
-        '-DCMAKE_OSX_DEPLOYMENT_TARGET=10.15',
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0',
         '-DBUILD_GMOCK=OFF',
         '-DDAWN_FETCH_DEPENDENCIES=ON',
-        '-DDAWN_BUILD_MONOLITHIC_LIBRARY=ON',
+        '-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED',   # NOTE: shared is easier to handle because of C++ stdlib dependency
         '-DDAWN_BUILD_SAMPLES=OFF',
         '-DDAWN_ENABLE_NULL=OFF',
         '-DENABLE_GLSLANG_BINARIES=OFF',
