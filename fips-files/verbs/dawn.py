@@ -70,14 +70,12 @@ def bootstrap(fips_dir):
     common_args = [
         *generator_args,
         '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0',
-        '-DBUILD_GMOCK=OFF',
         '-DDAWN_FETCH_DEPENDENCIES=ON',
         '-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED',   # NOTE: shared is easier to handle because of C++ stdlib dependency
         '-DDAWN_BUILD_SAMPLES=OFF',
+        '-DDAWN_BUILD_TESTS=OFF',
         '-DDAWN_ENABLE_NULL=OFF',
-        '-DENABLE_GLSLANG_BINARIES=OFF',
-        '-DENABLE_PCH=OFF',
-        '-DINSTALL_GTEST=OFF',
+        '-DDAWN_BUILD_PROTOBUF=OFF',
         '-DTINT_BUILD_CMD_TOOLS=OFF',
         '-DTINT_BUILD_GLSL_VALIDATOR=OFF',
         '-DTINT_BUILD_TESTS=OFF',
