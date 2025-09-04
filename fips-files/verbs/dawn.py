@@ -64,8 +64,11 @@ def cmake(fips_dir, mode, args):
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
     dawn_dir = get_dawn_dir(fips_dir)
+    generator_args = []
+    if util.get_host_platform() != 'win':
+        generator_args = ['-G', 'Ninja']
     common_args = [
-        '-G', 'Ninja',
+        *generator_args,
         '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0',
         '-DBUILD_GMOCK=OFF',
         '-DDAWN_FETCH_DEPENDENCIES=ON',
@@ -73,7 +76,6 @@ def bootstrap(fips_dir):
         '-DDAWN_BUILD_SAMPLES=OFF',
         '-DDAWN_ENABLE_NULL=OFF',
         '-DENABLE_GLSLANG_BINARIES=OFF',
-        '-DENABLE_HLSL=OFF',
         '-DENABLE_PCH=OFF',
         '-DINSTALL_GTEST=OFF',
         '-DTINT_BUILD_CMD_TOOLS=OFF',
@@ -87,9 +89,9 @@ def bootstrap(fips_dir):
     log.info('>> generating release build files')
     cmake(fips_dir, 'Release', release_args)
     log.info('>> building debug version...')
-    cmake(fips_dir, 'Debug', ['--build', '.'])
+    cmake(fips_dir, 'Debug', ['--build', '.', '--config', 'Debug'])
     log.info('>> building release version...')
-    cmake(fips_dir, 'Release', ['--build', '.'])
+    cmake(fips_dir, 'Release', ['--build', '.', '--config', 'Release'])
 
 # install and build the "Dawn SDK" into fips-sdks/dawn
 def install(fips_dir):
