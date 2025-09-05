@@ -64,11 +64,18 @@ def cmake(fips_dir, mode, args):
 def bootstrap(fips_dir):
     log.colored(log.YELLOW, "=== bootstrapping build...".format(get_sdk_dir(fips_dir)))
     dawn_dir = get_dawn_dir(fips_dir)
-    generator_args = []
-    if util.get_host_platform() != 'win':
-        generator_args = ['-G', 'Ninja']
+    platform_args = []
+    if util.get_host_platform() == 'win':
+        platform_args = [
+            '-DDAWN_ENABLE_D3D11=OFF',
+            '-DDAWN_ENABLE_VULKAN=OFF',
+        ]
+    else:
+        platform_args = [
+            '-G', 'Ninja',
+        ]
     common_args = [
-        *generator_args,
+        *platform_args,
         '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0',
         '-DDAWN_FETCH_DEPENDENCIES=ON',
         '-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED',   # NOTE: shared is easier to handle because of C++ stdlib dependency
@@ -76,6 +83,8 @@ def bootstrap(fips_dir):
         '-DDAWN_BUILD_TESTS=OFF',
         '-DDAWN_ENABLE_NULL=OFF',
         '-DDAWN_BUILD_PROTOBUF=OFF',
+        '-DDAWN_ENABLE_SPIRV_VALIDATION=OFF',
+        '-DDAWN_FORCE_SYSTEM_COMPONENT_LOAD=ON',    # take d3dcompiler_47.dll from system instead of local dir
         '-DTINT_BUILD_CMD_TOOLS=OFF',
         '-DTINT_BUILD_GLSL_VALIDATOR=OFF',
         '-DTINT_BUILD_TESTS=OFF',
