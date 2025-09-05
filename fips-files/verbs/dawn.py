@@ -84,6 +84,8 @@ def bootstrap(fips_dir):
         '-DDAWN_ENABLE_NULL=OFF',
         '-DDAWN_BUILD_PROTOBUF=OFF',
         '-DDAWN_ENABLE_SPIRV_VALIDATION=OFF',
+        '-DDAWN_ENABLE_DESKTOP_GL=OFF',
+        '-DDAWN_ENABLE_OPENGLES=OFF',
         '-DDAWN_FORCE_SYSTEM_COMPONENT_LOAD=ON',    # take d3dcompiler_47.dll from system instead of local dir
         '-DTINT_BUILD_CMD_TOOLS=OFF',
         '-DTINT_BUILD_GLSL_VALIDATOR=OFF',
