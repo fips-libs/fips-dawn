@@ -3,8 +3,8 @@
 [WIP] don't use this yet
 
 This makes a locally compiled [Google Dawn SDK](https://dawn.googlesource.com/dawn)
-available to fips projects as a header `webgpu/webgpu.h` and static libraries
-`webgpu_dawn`, `webgpu_glfw` and `webgpu_cpp`.
+available to fips projects as a header `webgpu/webgpu.h` and a dynamic library
+`[lib]webgpu_dawn.[dll|dylib|so]`
 
 ## How to use:
 
@@ -51,8 +51,6 @@ imports:
     ```cmake
         fips_libs(webgpu_dawn)
     ```
-
-    (and optionally also `webgpu_glfw` and `webgpu_cpp`)
 
     A Debug or Release build of the libraries will be automatically selected
     depending on the cmake build mode.

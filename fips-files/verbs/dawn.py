@@ -5,10 +5,6 @@
 #
 #   Bootstrap Google Dawn as SDK for other fips projects (similar
 #   to the emscripten or Android SDKs)
-#
-#   NOTE: there's now also downloadable precompiled packages here
-#   but those only have the webgpu_dawn DLL and headers, not the GLFW
-#   glue code: https://github.com/google/dawn/actions
 #===============================================================================
 
 import os, shutil, subprocess
@@ -76,7 +72,7 @@ def bootstrap(fips_dir):
         ]
     common_args = [
         *platform_args,
-        '-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0',
+        '-DCMAKE_OSX_DEPLOYMENT_TARGET=12.0',
         '-DDAWN_FETCH_DEPENDENCIES=ON',
         '-DDAWN_BUILD_MONOLITHIC_LIBRARY=SHARED',   # NOTE: shared is easier to handle because of C++ stdlib dependency
         '-DDAWN_BUILD_SAMPLES=OFF',
@@ -86,6 +82,7 @@ def bootstrap(fips_dir):
         '-DDAWN_ENABLE_SPIRV_VALIDATION=OFF',
         '-DDAWN_ENABLE_DESKTOP_GL=OFF',
         '-DDAWN_ENABLE_OPENGLES=OFF',
+        '-DDAWN_USE_GLFW=OFF',
         '-DDAWN_FORCE_SYSTEM_COMPONENT_LOAD=ON',    # take d3dcompiler_47.dll from system instead of local dir
         '-DTINT_BUILD_CMD_TOOLS=OFF',
         '-DTINT_BUILD_GLSL_VALIDATOR=OFF',
